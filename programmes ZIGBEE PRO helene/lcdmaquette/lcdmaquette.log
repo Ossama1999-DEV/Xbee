@@ -1,0 +1,15 @@
+0	1	mikroCPIC1618.exe -MSF -DBG -pP16F877A -UICD -DL -O11111114 -fo20 -N"C:\Users\hélène\Desktop\helene juil 2021\cesi\aspects technologiques\TP ZigBee\programmes ZIGBEE PRO helene\lcdmaquette\lcdmaquette.mcppi" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Defs\" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Uses\P16\" -SP"C:\Users\hélène\Desktop\helene juil 2021\cesi\aspects technologiques\TP ZigBee\programmes ZIGBEE PRO helene\lcdmaquette\" -IP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Uses\P16\" "lcdmaquette.c" "__Lib_Math.mcl" "__Lib_MathDouble.mcl" "__Lib_System.mcl" "__Lib_Delays.mcl" "__Lib_LcdConsts.mcl" "__Lib_Lcd.mcl"	 
+hint: 0	1139	Available RAM: 352 [bytes], Available ROM: 8192 [bytes]	 
+diagnostics: 0	122	Compilation Started	P16F877A.c
+diagnostics: 660	123	Compiled Successfully	P16F877A.c
+diagnostics: 0	122	Compilation Started	__Lib_Delays.c
+diagnostics: 123	123	Compiled Successfully	__Lib_Delays.c
+diagnostics: 0	122	Compilation Started	lcdmaquette.c
+diagnostics: 49	123	Compiled Successfully	lcdmaquette.c
+diagnostics: 0	127	All files Compiled in 47 ms	 
+hint: 0	1144	Used RAM (bytes): 26 (7%)  Free RAM (bytes): 326 (93%)	Used RAM (bytes): 26 (7%)  Free RAM (bytes): 326 (93%)
+hint: 0	1144	Used ROM (program words): 343 (4%)  Free ROM (program words): 7849 (96%)	Used ROM (program words): 343 (4%)  Free ROM (program words): 7849 (96%)
+diagnostics: 0	125	Project Linked Successfully	lcdmaquette.mcppi
+diagnostics: 0	128	Linked in 0 ms	 
+diagnostics: 0	129	Project 'lcdmaquette.mcppi' completed: 204 ms	 
+diagnostics: 0	103	Finished successfully: 18 nov. 2021, 18:14:22	lcdmaquette.mcppi

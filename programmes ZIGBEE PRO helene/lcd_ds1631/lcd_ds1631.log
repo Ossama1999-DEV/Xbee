@@ -1,0 +1,12 @@
+0	1	mikroCPIC1618.exe -MSF -DBG -pP16F877 -UICD -DL -O11111114 -fo8 -N"E:\programmes ZIGBEE PRO helene\lcd_ds1631\lcd_ds1631.mcppi" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Defs\" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Uses\P16\" -SP"E:\programmes ZIGBEE PRO helene\lcd_ds1631\" "lcd_ds1631.c" "__Lib_Math.mcl" "__Lib_MathDouble.mcl" "__Lib_System.mcl" "__Lib_Delays.mcl" "__Lib_CString.mcl" "__Lib_Conversions.mcl" "__Lib_I2C_c34.mcl" "__Lib_LcdConsts.mcl" "__Lib_Lcd.mcl"	 
+hint: 0	1139	Available RAM: 352 [bytes], Available ROM: 8192 [bytes]	 
+diagnostics: 0	122	Compilation Started	P16F877.c
+diagnostics: 624	123	Compiled Successfully	P16F877.c
+diagnostics: 0	122	Compilation Started	__Lib_Delays.c
+diagnostics: 123	123	Compiled Successfully	__Lib_Delays.c
+diagnostics: 0	122	Compilation Started	lcd_ds1631.c
+error: 123	324	Undeclared identifier '_I2C_TIMEOUT_RD' in expression	lcd_ds1631.c
+error: 126	324	Undeclared identifier '_I2C_TIMEOUT_WR' in expression	lcd_ds1631.c
+error: 129	324	Undeclared identifier '_I2C_TIMEOUT_START' in expression	lcd_ds1631.c
+error: 132	324	Undeclared identifier '_I2C_TIMEOUT_REPEATED_START' in expression	lcd_ds1631.c
+error: 0	102	Finished (with errors): 29 nov. 2023, 15:35:52	lcd_ds1631.mcppi
