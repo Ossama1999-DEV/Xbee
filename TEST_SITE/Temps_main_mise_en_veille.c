@@ -1,10 +1,10 @@
-/*  Nom du projet : LED_BP_LCD_DS1631_Thermostat
-    Date de test : Juin 2020
-    mikroC PRO for PIC v 7.5.0
-    Q 8Mhz
-    Pour  utiliser  l'afficheur, on souhaite utiliser le port B avec les  affectations suivantes : 0,1,5,4,3,2 pour : RS, EN, D7, D6, D5, D4.
-    PIC / 16F877
-*/
+/**!
+ * @author DBIBIH Oussama
+ * @file Temps_main_mise_en_veille.c
+ * @brief Lecture de la température via le capteur DS1631 et affichage sur LCD
+ *     avec gestion d'un bouton et d'une LED, et communication via XBee.
+ *    Le XBee est mis en veille (sleep) entre chaque envoi de température.
+ */
 
 //Broches du LCD.
 sbit LCD_RS at RB0_bit;

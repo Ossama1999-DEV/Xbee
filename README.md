@@ -1,2 +1,0 @@
-# Xbee
-ZigBee TP

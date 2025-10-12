@@ -1,10 +1,10 @@
-/*  Nom du projet : LED_BP_LCD_DS1631_Thermostat
-    Date de test : Juin 2020
-    mikroC PRO for PIC v 7.5.0
-    Q 8Mhz
-    Pour  utiliser  l'afficheur, on souhaite utiliser le port B avec les  affectations suivantes : 0,1,5,4,3,2 pour : RS, EN, D7, D6, D5, D4.
-    PIC / 16F877
-*/
+/**!
+ * @author DBIBIH Oussama
+ * @file main_mise_en_veille.c
+ * @brief Lecture de la température via le capteur DS1631 et affichage sur LCD
+ *      avec gestion d'un bouton et d'une LED, et communication via XBee.
+ *     Le XBee est mis en veille (sleep) entre chaque envoi de température.
+ */
 
 //Broches du LCD.
 sbit LCD_RS at RB0_bit;
@@ -174,101 +174,108 @@ void xbee_wake() {
     PORTD.F2 = 0;     // Éteint après
 }
 
-// function MAIN
 void main() {
-DS1631_Config config;
-DS1631_Temperature temp;
-char msg[15];                      // Message contenant la valeur contenue pour String.
-char tableau[] = "Temperature ";
-char saut[] = "\r\n" ;
-char point[] = "." ;
-char degres[] = "C";
 
-PORTD = 0;                        // Initialize PORTC
-TRISD = 0b00100000;               // Configure D5 en entr?e et les autres en sorties
+    // =========================================================================
+    // 1️⃣  Déclarations et variables
+    // =========================================================================
+    DS1631_Config config;           // Structure de configuration du DS1631
+    DS1631_Temperature temp;        // Structure pour stocker température (entier + décimal)
+    char msg[15];                   // Chaîne utilisée pour convertir les valeurs numériques
+    char tableau[] = "Temperature "; // Message de base pour XBee
+    char saut[] = "\r\n";           // Retour à la ligne pour XBee
+    char point[] = ".";             // Séparateur décimal
+    char degres[] = "C";            // Symbole d’unité °C
 
-/**
-mode veille Xbee
-*/
-TRISD.F0 = 0; // RD0 : RESET -> sortie
-TRISD.F1 = 0; // RD1 : SLEEP_RQ -> sortie
-TRISD.F6 = 1; // RD6 : bouton -> entrée
-TRISD.F2 = 0; // LED témoin wake
-TRISD.F3 = 0; // LED témoin sleep
+    // =========================================================================
+    // 2️⃣  Configuration des ports
+    // =========================================================================
+    PORTD = 0;                        // Mise à zéro initiale du PORTD
+    TRISD = 0b00100000;               // RD5 = entrée, les autres = sorties
 
+    // --- Lignes dédiées au XBee et aux indicateurs LED ---
+    TRISD.F0 = 0; // RD0 : RESET (sortie)
+    TRISD.F1 = 0; // RD1 : SLEEP_RQ (sortie)
+    TRISD.F2 = 0; // RD2 : LED témoin "wake"
+    TRISD.F3 = 0; // RD3 : LED témoin "sleep"
+    TRISD.F6 = 1; // RD6 : bouton poussoir (entrée)
+    // RD7 : sortie LED de test (toggling manuel dans la boucle)
 
-// Initialisation du LCD.
-Lcd_Init();
-Lcd_Cmd(_LCD_CLEAR);
-Lcd_Cmd(_LCD_CURSOR_OFF);
-config.ONE_SHOT = 1;              // Mode one-shot.
-config.POL = 1;                   // TOUT actif avec un niveau logique haut.
-config.R = 3;                     // Resolution de 12 bits. //config.R = 0; // Resolution de 9 bits.
-// Initialisation du DS1631.
-DS1631_Init(0, &config);
-// D?finir les limites sup?rieure TH et TL inf?rieure du thermostat.
-DS1631_Write_Temperature(0, 20, 25);
+    // =========================================================================
+    // 3️⃣  Initialisation des périphériques
+    // =========================================================================
+    // --- LCD ---
+    Lcd_Init();                      // Initialisation de l’écran LCD
+    Lcd_Cmd(_LCD_CLEAR);             // Effacer l’écran
+    Lcd_Cmd(_LCD_CURSOR_OFF);        // Cacher le curseur
 
-while(1) {
-// D?marre la conversion One-Shot.
-DS1631_Start(0);
-//Attendre 750 ms, car la r?solution est de 12 bits.
-Delay_ms(750);
-// ?crire sur l'?cran LCD.
-Lcd_Cmd(_LCD_CLEAR);
-Lcd_Out(1, 5, "DS1631");
+    // --- DS1631 (capteur de température I2C) ---
+    config.ONE_SHOT = 1;             // Mode One-Shot (mesure ponctuelle)
+    config.POL = 1;                  // Sortie TOUT active à l’état haut
+    config.R = 3;                    // Résolution 12 bits
+    DS1631_Init(0, &config);         // Initialisation du capteur
+    DS1631_Write_Temperature(0, 20, 25); // Définition des seuils TH/TL (20°C et 25°C)
 
-Lcd_Out(2, 1, "Temp: ");
+    // =========================================================================
+    // 4️⃣  Boucle principale
+    // =========================================================================
+    while(1) {
 
-/**!
-  Sleep de Xbee
-*/
-// PORTD.F1 = 0; 
-// delay_ms(100);
-xbee_wake();  // réveiller le XBee
+        // ---------------------------------------------------------------------
+        // 🔹 Étape 1 : Lecture de la température via I2C
+        // ---------------------------------------------------------------------
+        DS1631_Start(0);                 // Lancer une conversion One-Shot
+        Delay_ms(750);                   // Attendre la fin de conversion (résolution 12 bits)
+        temp = DS1631_Read_Temperature(0); // Lire la température (MSB + LSB)
 
-// Lire la température depuis le capteur
-temp = DS1631_Read_Temperature(0);
+        // ---------------------------------------------------------------------
+        // 🔹 Étape 2 : Traitement de la valeur lue
+        // ---------------------------------------------------------------------
+        // Si le bit 7 du LSB = 1 → ajouter +0.5°C
+        if (((unsigned*)&temp)[0] & 0x80) {
+            temp.decimal = 5;            // partie décimale = .5
+        } else {
+            temp.decimal = 0;            // partie décimale = .0
+        }
 
-// Appliquer l'arrondi logique à 0.5
-if (((unsigned*)&temp)[0] & 0x80) {
-    temp.entiere += 0;          // on garde l'entier
-    temp.decimal = 5;           // on force 0.5
-} else {
-    temp.decimal = 0;           // sinon, c'est .0
-}
+        // ---------------------------------------------------------------------
+        // 🔹 Étape 3 : Affichage LCD
+        // ---------------------------------------------------------------------
+        Lcd_Cmd(_LCD_CLEAR);
+        Lcd_Out(1, 5, "DS1631");
+        Lcd_Out(2, 1, "Temp: ");
 
-// Convertir l'entier en chaîne
-IntToStr(temp.entiere, msg);  // msg contient des blancs initiaux
-xbee(11,tableau);           // afficher température
-Lcd_Out_CP(msg);          // sauter les 3 blancs
-xbee(3, msg + 3);
-xbee(1, point);               // envoyer le point décimal
-Lcd_Chr_CP('.');
+        IntToStr(temp.entiere, msg);     // Convertir la partie entière en texte
+        Lcd_Out_CP(msg + 3);             // Afficher sans les espaces
+        Lcd_Chr_CP('.');                 // Afficher le point décimal
 
-// Ajouter la partie décimale (0 ou 5)
-msg[0] = temp.decimal + '0';  // convertir chiffre en ASCII
-msg[1] = '\0';                // fin de chaîne
-Lcd_Out_CP(msg);              // afficher .0 ou .5
-xbee(1, msg);
-// Afficher le symbole °C
-Lcd_Chr_CP(223);
-Lcd_Chr_CP('C');
-xbee(1, degres);
-xbee(2, saut);
+        msg[0] = temp.decimal + '0';     // Convertir la partie décimale (.0 / .5)
+        msg[1] = '\0';
+        Lcd_Out_CP(msg);                 // Afficher .0 ou .5
+        Lcd_Chr_CP(223);                 // Afficher le symbole ° 
+        Lcd_Chr_CP('C');                 // puis "C"
 
-/**!
-  Wake up de Xbee
-*/
-// PORTD.F1 = 1; 
-// delay_ms(100);
-xbee_hibernate();  // endormir le XBee
+        // ---------------------------------------------------------------------
+        // 🔹 Étape 4 : Communication XBee (UART)
+        // ---------------------------------------------------------------------
+        xbee_wake();                     // Réveiller le module XBee
+        xbee(11, tableau);               // Envoyer "Temperature "
+        xbee(3, msg + 3);                // Envoyer la partie entière
+        xbee(1, point);                  // Envoyer le point
+        xbee(1, msg);                    // Envoyer la partie décimale
+        xbee(1, degres);                 // Envoyer "C"
+        xbee(2, saut);                   // Saut de ligne
+        xbee_hibernate();                // Remettre le XBee en veille
 
-if (PORTD.F6 = 1){
-    PORTD.F7 =  ~PORTD.F7;      // toggle D7
-    delay_ms(1000);             // one second delay
+        // ---------------------------------------------------------------------
+        // 🔹 Étape 5 : Gestion du bouton sur RD6 et LED sur RD7
+        // ---------------------------------------------------------------------
+        if (PORTD.F6 == 1) {
+            PORTD.F7 = ~PORTD.F7;        // Inversion de la LED sur RD7
+            Delay_ms(1000);              // Attente 1 seconde
+        } else {
+            PORTD.F7 = 0;                // LED éteinte si le bouton n’est pas appuyé
+        }
     }
-    else
-    PORTD.F7 = 0;
 }
-}
+
