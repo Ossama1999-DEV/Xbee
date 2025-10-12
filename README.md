@@ -1,8 +1,4 @@
-# 🔥 Projet : LED_BP_LCD_DS1631  
-**Microcontrôleur :** PIC16F877A  
-**Logiciel :** MikroC PRO for PIC v7.5.0  
-**Fréquence quartz :** 8 MHz  
-**Date de test :** Juin 2020  
+# Projet : LED_LCD DS1631 Xbee
 
 ---
 
